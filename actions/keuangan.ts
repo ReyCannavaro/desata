@@ -21,7 +21,7 @@ export async function createTransaksiAction(
 ): Promise<ActionResult & { id?: string; warningPagu?: string }> {
   const parsed = TransaksiSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
   const supabase = await createClient();
@@ -42,14 +42,15 @@ export async function createTransaksiAction(
   let warningPagu: string | undefined;
   if (parsed.data.jenis === "pengeluaran") {
     const tahun = new Date(parsed.data.tanggal).getFullYear();
-    const { data: warning } = await supabase.rpc("check_pagu_warning", {
+    const { data: warningRows } = await supabase.rpc("check_pagu_warning", {
       kategori_id_param: parsed.data.kategori_id,
       nominal_param: parsed.data.nominal,
       tahun_param: tahun,
     });
 
+    const warning = Array.isArray(warningRows) ? warningRows[0] : null;
     if (warning?.is_warning) {
-      warningPagu = `Pengeluaran ini akan mencapai ${warning.percentage.toFixed(1)}% dari pagu anggaran. Sisa pagu: Rp ${warning.sisa_pagu.toLocaleString("id-ID")}`;
+      warningPagu = `Pengeluaran ini akan mencapai ${Number(warning.percentage).toFixed(1)}% dari pagu anggaran. Sisa pagu: Rp ${Number(warning.sisa_pagu).toLocaleString("id-ID")}`;
     }
   }
 
@@ -116,7 +117,6 @@ export async function deleteTransaksiAction(id: string): Promise<ActionResult> {
   return { success: true };
 }
 
-// Ambil data keuangan publik (tanpa auth)
 export async function getKeuanganPublik(params: {
   desaId: string;
   tahun?: number;

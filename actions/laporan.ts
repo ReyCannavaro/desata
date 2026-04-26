@@ -33,7 +33,7 @@ export async function createLaporanAction(
 ): Promise<ActionResult & { nomorTiket?: string }> {
   const parsed = CreateLaporanSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
   const supabase = await createClient();
@@ -91,7 +91,7 @@ export async function updateStatusLaporanAction(
 ): Promise<ActionResult> {
   const parsed = UpdateStatusSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
   const supabase = await createClient();
@@ -188,8 +188,7 @@ export async function getLaporanByTiket(nomorTiket: string) {
 
   if (error || !data) return null;
 
-  const { email_pelapor, wa_pelapor, ip_address, ...publicData } = data;
-  void email_pelapor; void wa_pelapor; void ip_address;
+  const { email_pelapor: _e, wa_pelapor: _w, ip_address: _i, ...publicData } = data;
 
   return publicData;
 }
@@ -213,8 +212,8 @@ export async function getLaporanPublik(params: {
     .neq("status", "DITOLAK")
     .range(offset, offset + limit - 1);
 
-  if (params.kategori) query = query.eq("kategori", params.kategori);
-  if (params.status) query = query.eq("status", params.status);
+  if (params.kategori) query = query.eq("kategori", params.kategori as import("@/lib/supabase/types").KategoriLaporan);
+  if (params.status) query = query.eq("status", params.status as import("@/lib/supabase/types").StatusLaporan);
 
   if (params.sortBy === "upvote") {
     query = query.order("upvote_count", { ascending: false });

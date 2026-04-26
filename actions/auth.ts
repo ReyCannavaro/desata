@@ -37,7 +37,7 @@ export async function loginAction(
 
   const parsed = LoginSchema.safeParse(raw);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
   const supabase = await createClient();
@@ -75,7 +75,7 @@ export async function resetPasswordAction(
   const parsed = ResetPasswordSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
   const supabase = await createClient();
@@ -96,7 +96,7 @@ export async function updatePasswordAction(
   const parsed = UpdatePasswordSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.errors[0].message };
+    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
   const supabase = await createClient();
