@@ -1,47 +1,38 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { TopBar } from "@/components/layout/top-bar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: {
-    default: "DESATA — Desa yang Tertata",
-    template: "%s | DESATA",
-  },
-  description:
-    "Platform transparansi keuangan dan aspirasi masyarakat desa. Wujudkan desa yang transparan, akuntabel, dan responsif.",
-  keywords: ["dana desa", "transparansi", "APBDes", "laporan warga", "e-government"],
-  authors: [{ name: "Tim DESATA — SMK Telkom Sidoarjo" }],
-  openGraph: {
-    title: "DESATA — Desa yang Tertata",
-    description: "Platform transparansi keuangan dan aspirasi masyarakat desa",
-    type: "website",
-    locale: "id_ID",
-  },
-};
-
-export default function RootLayout({
+export default async function DashboardLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("*, desa(*)")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !profile.is_active) {
+    await supabase.auth.signOut();
+    redirect("/login?error=akun-nonaktif");
+  }
+
   return (
-    <html
-      lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
-        {children}
-      </body>
-    </html>
+    <div className="min-h-screen flex bg-slate-50">
+      <SidebarNav profile={profile} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <TopBar user={user} profile={profile} />
+        <main className="flex-1 p-6 overflow-auto">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
