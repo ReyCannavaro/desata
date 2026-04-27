@@ -16,7 +16,11 @@ export default async function CekLaporanPage({
 }) {
   const params = await searchParams;
   const tiket = params.tiket?.trim().toUpperCase();
+
+  // Fetch laporan dari server — null jika tiket tidak ada / tidak ditemukan
   const laporan = tiket ? await getLaporanByTiket(tiket) : null;
+
+  // Hapus desa_id dari props (keamanan)
   void DEMO_DESA_ID;
 
   return (
@@ -29,6 +33,7 @@ export default async function CekLaporanPage({
       </div>
 
       <CekLaporanClient
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         laporan={laporan as any}
         initialTiket={tiket}
       />

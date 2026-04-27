@@ -25,7 +25,7 @@ export type CreateLaporanInput = z.infer<typeof CreateLaporanSchema>;
 
 const UpdateStatusSchema = z.object({
   status: z.enum(["DITERIMA", "DIVERIFIKASI", "DALAM_PROSES", "DITOLAK", "SELESAI"]),
-  catatan: z.string().optional(),
+  catatan: z.string().max(500).optional(),
 });
 
 export async function createLaporanAction(
@@ -82,6 +82,7 @@ export async function createLaporanAction(
   }
 
   revalidatePath("/lapor");
+  revalidatePath("/dashboard");
   return { success: true, nomorTiket: data.nomor_tiket };
 }
 
@@ -95,18 +96,29 @@ export async function updateStatusLaporanAction(
   }
 
   const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("role, desa_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin_desa", "super_admin"].includes(profile.role)) {
+    return { success: false, error: "Akses ditolak" };
+  }
 
   const { data: laporan } = await supabase
     .from("laporan_warga")
-    .select("status")
+    .select("status, desa_id")
     .eq("id", laporanId)
     .single();
 
   if (!laporan) return { success: false, error: "Laporan tidak ditemukan" };
-
+  if (laporan.desa_id !== profile.desa_id) return { success: false, error: "Akses ditolak" };
   if (laporan.status === "SELESAI") {
     return { success: false, error: "Laporan yang sudah selesai tidak dapat diubah statusnya." };
   }
@@ -122,12 +134,13 @@ export async function updateStatusLaporanAction(
     laporan_id: laporanId,
     status_lama: laporan.status,
     status_baru: parsed.data.status,
-    catatan: parsed.data.catatan,
+    catatan: parsed.data.catatan ?? null,
     changed_by: user.id,
   });
 
   revalidatePath("/laporan");
   revalidatePath(`/laporan/${laporanId}`);
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -135,7 +148,7 @@ export async function upvoteLaporanAction(
   laporanId: string,
   fingerprint: string,
   ipAddress?: string
-): Promise<ActionResult & { newCount?: number }> {
+): Promise<ActionResult & { newCount?: number; alreadyVoted?: boolean }> {
   const supabase = await createClient();
 
   const { data: existing } = await supabase
@@ -143,16 +156,16 @@ export async function upvoteLaporanAction(
     .select("id")
     .eq("laporan_id", laporanId)
     .eq("fingerprint", fingerprint)
-    .single();
+    .maybeSingle();
 
   if (existing) {
-    return { success: false, error: "Anda sudah mendukung laporan ini." };
+    return { success: false, error: "Anda sudah mendukung laporan ini.", alreadyVoted: true };
   }
 
   const { error: upvoteError } = await supabase.from("upvotes").insert({
     laporan_id: laporanId,
     fingerprint,
-    ip_address: ipAddress,
+    ip_address: ipAddress ?? null,
   });
 
   if (upvoteError) return { success: false, error: "Gagal memberikan dukungan." };
@@ -183,13 +196,12 @@ export async function getLaporanByTiket(nomorTiket: string) {
   const { data, error } = await supabase
     .from("laporan_warga")
     .select("*, laporan_status_log(*, user_profiles(nama))")
-    .eq("nomor_tiket", nomorTiket.toUpperCase())
+    .eq("nomor_tiket", nomorTiket.toUpperCase().trim())
     .single();
 
   if (error || !data) return null;
 
   const { email_pelapor: _e, wa_pelapor: _w, ip_address: _i, ...publicData } = data;
-
   return publicData;
 }
 
@@ -207,23 +219,106 @@ export async function getLaporanPublik(params: {
 
   let query = supabase
     .from("laporan_warga")
-    .select("id, nomor_tiket, judul, kategori, deskripsi, foto_urls, lokasi_lat, lokasi_lng, status, upvote_count, is_prioritas_tinggi, is_anonim, nama_pelapor, created_at", { count: "exact" })
+    .select(
+      "id, nomor_tiket, judul, kategori, deskripsi, foto_urls, lokasi_lat, lokasi_lng, status, upvote_count, is_prioritas_tinggi, is_anonim, nama_pelapor, created_at",
+      { count: "exact" }
+    )
     .eq("desa_id", params.desaId)
     .neq("status", "DITOLAK")
     .range(offset, offset + limit - 1);
 
-  if (params.kategori) query = query.eq("kategori", params.kategori as import("@/lib/supabase/types").KategoriLaporan);
-  if (params.status) query = query.eq("status", params.status as import("@/lib/supabase/types").StatusLaporan);
+  if (params.kategori) {
+    query = query.eq("kategori", params.kategori as import("@/lib/supabase/types").KategoriLaporan);
+  }
+  if (params.status) {
+    query = query.eq("status", params.status as import("@/lib/supabase/types").StatusLaporan);
+  }
+
+  query =
+    params.sortBy === "upvote"
+      ? query.order("upvote_count", { ascending: false })
+      : query.order("created_at", { ascending: false });
+
+  const { data, error, count } = await query;
+  if (error) throw new Error("Gagal mengambil daftar laporan");
+
+  return {
+    laporan: data ?? [],
+    total: count ?? 0,
+    page,
+    totalPages: Math.ceil((count ?? 0) / limit),
+  };
+}
+
+export async function getLaporanAdmin(params: {
+  desaId: string;
+  page?: number;
+  status?: string;
+  kategori?: string;
+  sortBy?: "terbaru" | "upvote" | "prioritas";
+}) {
+  const supabase = await createClient();
+  const page = params.page ?? 1;
+  const limit = 20;
+  const offset = (page - 1) * limit;
+
+  let query = supabase
+    .from("laporan_warga")
+    .select(
+      "id, nomor_tiket, judul, kategori, deskripsi, foto_urls, lokasi_lat, lokasi_lng, status, upvote_count, is_prioritas_tinggi, is_anonim, nama_pelapor, email_pelapor, wa_pelapor, petugas_id, created_at, updated_at",
+      { count: "exact" }
+    )
+    .eq("desa_id", params.desaId)
+    .range(offset, offset + limit - 1);
+
+  if (params.status) {
+    query = query.eq("status", params.status as import("@/lib/supabase/types").StatusLaporan);
+  }
+  if (params.kategori) {
+    query = query.eq("kategori", params.kategori as import("@/lib/supabase/types").KategoriLaporan);
+  }
 
   if (params.sortBy === "upvote") {
     query = query.order("upvote_count", { ascending: false });
+  } else if (params.sortBy === "prioritas") {
+    query = query.order("is_prioritas_tinggi", { ascending: false }).order("created_at", { ascending: false });
   } else {
     query = query.order("created_at", { ascending: false });
   }
 
   const { data, error, count } = await query;
+  if (error) throw new Error("Gagal mengambil data laporan admin");
 
-  if (error) throw new Error("Gagal mengambil daftar laporan");
+  return {
+    laporan: data ?? [],
+    total: count ?? 0,
+    page,
+    totalPages: Math.ceil((count ?? 0) / limit),
+  };
+}
 
-  return { laporan: data, total: count ?? 0, page, totalPages: Math.ceil((count ?? 0) / limit) };
+export async function getLaporanDetailAdmin(laporanId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("role, desa_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) return null;
+
+  const { data, error } = await supabase
+    .from("laporan_warga")
+    .select("*, laporan_status_log(*, user_profiles(nama))")
+    .eq("id", laporanId)
+    .eq("desa_id", profile.desa_id)
+    .single();
+
+  if (error || !data) return null;
+  return data;
 }

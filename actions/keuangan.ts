@@ -25,8 +25,9 @@ export async function createTransaksiAction(
   }
 
   const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
   const { data: profile } = await supabase
@@ -71,7 +72,8 @@ export async function createTransaksiAction(
 
   revalidatePath("/transparansi");
   revalidatePath("/keuangan");
-
+  revalidatePath("/statistik");
+  revalidatePath("/dashboard");
   return { success: true, id: data.id, warningPagu };
 }
 
@@ -80,7 +82,9 @@ export async function updateTransaksiAction(
   input: Partial<CreateTransaksiInput>
 ): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
   const { data: profile } = await supabase
@@ -100,25 +104,22 @@ export async function updateTransaksiAction(
     .single();
 
   if (!existing) return { success: false, error: "Transaksi tidak ditemukan." };
-  if (existing.desa_id !== profile.desa_id) {
-    return { success: false, error: "Akses ditolak" };
-  }
+  if (existing.desa_id !== profile.desa_id) return { success: false, error: "Akses ditolak" };
 
-  const { error } = await supabase
-    .from("transaksi")
-    .update(input)
-    .eq("id", id);
-
+  const { error } = await supabase.from("transaksi").update(input).eq("id", id);
   if (error) return { success: false, error: "Gagal memperbarui transaksi." };
 
   revalidatePath("/transparansi");
   revalidatePath("/keuangan");
+  revalidatePath("/statistik");
   return { success: true };
 }
 
 export async function deleteTransaksiAction(id: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
   const { data: profile } = await supabase
@@ -138,16 +139,15 @@ export async function deleteTransaksiAction(id: string): Promise<ActionResult> {
     .single();
 
   if (!transaksi) return { success: false, error: "Transaksi tidak ditemukan." };
-  if (transaksi.desa_id !== profile.desa_id) {
-    return { success: false, error: "Akses ditolak" };
-  }
+  if (transaksi.desa_id !== profile.desa_id) return { success: false, error: "Akses ditolak" };
 
   const { error } = await supabase.from("transaksi").delete().eq("id", id);
-
   if (error) return { success: false, error: "Gagal menghapus transaksi." };
 
   revalidatePath("/transparansi");
   revalidatePath("/keuangan");
+  revalidatePath("/statistik");
+  revalidatePath("/dashboard");
   return { success: true };
 }
 
@@ -170,9 +170,10 @@ export async function getKeuanganPublik(params: {
 
   if (params.bulan) {
     const bulanStr = params.bulan.toString().padStart(2, "0");
+    const lastDay = new Date(tahun, params.bulan, 0).getDate();
     query = query
       .gte("tanggal", `${tahun}-${bulanStr}-01`)
-      .lte("tanggal", `${tahun}-${bulanStr}-31`);
+      .lte("tanggal", `${tahun}-${bulanStr}-${lastDay}`);
   }
 
   if (params.kategoriId) {
@@ -180,7 +181,6 @@ export async function getKeuanganPublik(params: {
   }
 
   const { data, error } = await query;
-
   if (error) throw new Error("Gagal mengambil data keuangan");
 
   const totalPemasukan = data
@@ -201,34 +201,107 @@ export async function getKeuanganPublik(params: {
   };
 }
 
+export async function getKeuanganPerBulan(params: {
+  desaId: string;
+  tahun: number;
+}) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("transaksi")
+    .select("jenis, nominal, tanggal")
+    .eq("desa_id", params.desaId)
+    .gte("tanggal", `${params.tahun}-01-01`)
+    .lte("tanggal", `${params.tahun}-12-31`);
+
+  if (error) throw new Error("Gagal mengambil data per bulan");
+
+  const BULAN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+  return Array.from({ length: 12 }, (_, i) => {
+    const bulan = (i + 1).toString().padStart(2, "0");
+    const prefix = `${params.tahun}-${bulan}`;
+    const filtered = (data ?? []).filter((t) => t.tanggal.startsWith(prefix));
+    return {
+      bulan: BULAN[i],
+      pemasukan: filtered.filter((t) => t.jenis === "pemasukan").reduce((s, t) => s + t.nominal, 0),
+      pengeluaran: filtered.filter((t) => t.jenis === "pengeluaran").reduce((s, t) => s + t.nominal, 0),
+    };
+  });
+}
+
+export async function getRealisasiAnggaran(params: {
+  desaId: string;
+  tahun: number;
+}) {
+  const supabase = await createClient();
+
+  const [{ data: pagu }, { data: transaksi }] = await Promise.all([
+    supabase
+      .from("pagu_anggaran")
+      .select("*, kategori_program(nama, warna)")
+      .eq("desa_id", params.desaId)
+      .eq("tahun", params.tahun),
+    supabase
+      .from("transaksi")
+      .select("kategori_id, nominal")
+      .eq("desa_id", params.desaId)
+      .eq("jenis", "pengeluaran")
+      .gte("tanggal", `${params.tahun}-01-01`)
+      .lte("tanggal", `${params.tahun}-12-31`),
+  ]);
+
+  if (!pagu) return [];
+
+  const realisasiMap: Record<string, number> = {};
+  (transaksi ?? []).forEach((t) => {
+    realisasiMap[t.kategori_id] = (realisasiMap[t.kategori_id] ?? 0) + t.nominal;
+  });
+
+  return pagu.map((p) => {
+    const realisasi = realisasiMap[p.kategori_id] ?? 0;
+    const persentase = p.nominal > 0 ? Math.min((realisasi / p.nominal) * 100, 100) : 0;
+    const kategori = p.kategori_program as { nama: string; warna: string | null } | null;
+    return {
+      kategori_id: p.kategori_id,
+      nama: kategori?.nama ?? "—",
+      warna: kategori?.warna ?? "#94A3B8",
+      pagu: p.nominal,
+      realisasi,
+      persentase: Math.round(persentase),
+    };
+  });
+}
+
 export async function setPaguAnggaranAction(input: {
   kategori_id: string;
   tahun: number;
   nominal: number;
 }): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
   const { data: profile } = await supabase
     .from("user_profiles")
-    .select("desa_id")
+    .select("desa_id, role")
     .eq("id", user.id)
     .single();
 
-  if (!profile) return { success: false, error: "Profil tidak ditemukan" };
+  if (!profile || !["admin_desa", "super_admin"].includes(profile.role)) {
+    return { success: false, error: "Akses ditolak" };
+  }
 
-  // FIX: tambah onConflict supaya upsert benar-benar update jika sudah ada
   const { error } = await supabase.from("pagu_anggaran").upsert(
-    {
-      ...input,
-      desa_id: profile.desa_id,
-    },
+    { ...input, desa_id: profile.desa_id },
     { onConflict: "desa_id,kategori_id,tahun" }
   );
 
   if (error) return { success: false, error: "Gagal menyimpan pagu anggaran." };
 
   revalidatePath("/keuangan");
+  revalidatePath("/statistik");
   return { success: true };
 }
