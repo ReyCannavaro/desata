@@ -69,7 +69,7 @@ export function StatistikClient({ transaksi, laporan, tahun }: Props) {
             <XAxis dataKey="bulan" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
             <YAxis tickFormatter={formatJuta} tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={55} />
             <Tooltip
-              formatter={(val: number) => `Rp ${val.toLocaleString("id-ID")}`}
+              formatter={(val: unknown) => [`Rp ${Number(val).toLocaleString('id-ID')}`, ''] as [string, string]}
               contentStyle={{ borderRadius: 10, border: "1px solid #E2E8F0", fontSize: 12 }}
             />
             <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -94,7 +94,7 @@ export function StatistikClient({ transaksi, laporan, tahun }: Props) {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(val: number) => `Rp ${val.toLocaleString("id-ID")}`}
+                    formatter={(val: unknown) => [`Rp ${Number(val).toLocaleString('id-ID')}`, ''] as [string, string]}
                     contentStyle={{ borderRadius: 10, border: "1px solid #E2E8F0", fontSize: 12 }}
                   />
                 </PieChart>

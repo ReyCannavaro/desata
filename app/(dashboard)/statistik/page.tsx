@@ -5,6 +5,7 @@ import { getKeuanganPublik } from "@/actions/keuangan";
 import { getLaporanPublik } from "@/actions/laporan";
 import { TopBar } from "@/components/layout/top-bar";
 import { StatistikClient } from "@/components/statistik/statistik-client";
+import type { TransaksiWithKategori, LaporanWarga } from "@/lib/supabase/types";
 
 export const metadata: Metadata = { title: "Statistik" };
 
@@ -34,8 +35,8 @@ export default async function StatistikPage() {
       />
       <main className="flex-1 p-6">
         <StatistikClient
-          transaksi={keuangan?.transaksi ?? []}
-          laporan={laporan?.laporan ?? []}
+          transaksi={(keuangan?.transaksi ?? []) as unknown as TransaksiWithKategori[]}
+          laporan={(laporan?.laporan ?? []) as unknown as Pick<LaporanWarga, "kategori" | "status" | "upvote_count" | "created_at">[]}
           tahun={tahun}
         />
       </main>

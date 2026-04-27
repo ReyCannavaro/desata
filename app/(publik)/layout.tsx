@@ -6,7 +6,6 @@ export default function PublikLayout({ children }: { children: React.ReactNode }
       <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
-          {/* Logo pakai logo-nav.svg */}
           <Link href="/beranda" className="flex items-center">
             <img src="/logo-nav.svg" alt="DESATA" className="h-8" />
           </Link>
@@ -32,10 +31,8 @@ export default function PublikLayout({ children }: { children: React.ReactNode }
             </Link>
             <Link
               href="/login"
-              className="ml-3 px-4 py-2 text-sm font-medium text-white rounded-lg transition"
+              className="ml-3 px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
               style={{ background: "#1E40AF" }}
-              onMouseOver={e => (e.currentTarget.style.background = "#1E3A8A")}
-              onMouseOut={e => (e.currentTarget.style.background = "#1E40AF")}
             >
               Login Perangkat Desa
             </Link>

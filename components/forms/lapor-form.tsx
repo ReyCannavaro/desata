@@ -57,8 +57,8 @@ export function LaporForm({ desaId }: Props) {
   if (tiket) {
     return (
       <div className="text-center py-6 space-y-4">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto" style={{background:'#DBEAFE',width:'3.5rem',height:'3.5rem',borderRadius:'50%'}}">
-          <CheckCircle2 size={28} className="" style={{color:'#1E40AF'}}" />
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto" style={{background:'#DBEAFE',width:'3.5rem',height:'3.5rem',borderRadius:'50%'}}>
+          <CheckCircle2 size={28} style={{color:'#1E40AF'}} />
         </div>
         <div>
           <p className="font-semibold text-slate-800 text-lg">Laporan Terkirim!</p>
@@ -73,7 +73,7 @@ export function LaporForm({ desaId }: Props) {
         <div className="flex gap-2 justify-center">
           <a
             href={`/cek-laporan?tiket=${tiket}`}
-            className="px-5 py-2.5 text-white text-sm font-medium rounded-xl transition" style={{background:'#1E40AF'}}"
+            className="px-5 py-2.5 text-white text-sm font-medium rounded-xl transition" style={{background:'#1E40AF'}}
           >
             Pantau Laporan
           </a>
@@ -191,7 +191,7 @@ export function LaporForm({ desaId }: Props) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-3 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium rounded-xl transition text-sm" style={{background:'#1E40AF'}}"
+        className="w-full py-3 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium rounded-xl transition text-sm" style={{background:'#1E40AF'}}
       >
         {isPending ? "Mengirim Laporan..." : "Kirim Laporan"}
       </button>

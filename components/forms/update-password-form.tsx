@@ -68,7 +68,7 @@ export function UpdatePasswordForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-2.5 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors" style={{background:'#1E40AF'}}"
+        className="w-full py-2.5 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors" style={{background:'#1E40AF'}}
       >
         {isPending ? "Menyimpan..." : "Simpan Password Baru"}
       </button>

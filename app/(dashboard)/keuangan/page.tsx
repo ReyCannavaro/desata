@@ -4,6 +4,7 @@ import { getCurrentUser } from "@/actions/auth";
 import { getKeuanganPublik } from "@/actions/keuangan";
 import { TopBar } from "@/components/layout/top-bar";
 import { KeuanganClient } from "@/components/keuangan/keuangan-client";
+import type { TransaksiWithKategori } from "@/lib/supabase/types";
 
 export const metadata: Metadata = { title: "Keuangan" };
 
@@ -39,7 +40,7 @@ export default async function KeuanganPage({
       />
       <main className="flex-1 p-6">
         <KeuanganClient
-          transaksi={keuangan.transaksi}
+          transaksi={keuangan.transaksi as unknown as TransaksiWithKategori[]}
           summary={keuangan.summary}
           tahun={tahun}
           desaId={data.profile.desa_id}

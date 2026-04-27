@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import type { ActionResult } from "./auth";
-import type { StatusLaporan } from "@/lib/supabase/types";
+import type { KategoriLaporan, StatusLaporan } from "@/lib/supabase/types";
 
 const CreateLaporanSchema = z.object({
   judul: z.string().min(10, "Judul minimal 10 karakter").max(150),
@@ -69,7 +69,7 @@ export async function createLaporanAction(
     .insert({
       ...parsed.data,
       nomor_tiket: tiketData,
-      status: "DITERIMA",
+      status: "DITERIMA" as StatusLaporan,
       upvote_count: 0,
       is_prioritas_tinggi: false,
     })
@@ -96,9 +96,7 @@ export async function updateStatusLaporanAction(
   }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
   const { data: profile } = await supabase
@@ -180,10 +178,7 @@ export async function upvoteLaporanAction(
 
   await supabase
     .from("laporan_warga")
-    .update({
-      upvote_count: newCount,
-      is_prioritas_tinggi: newCount > 50,
-    })
+    .update({ upvote_count: newCount, is_prioritas_tinggi: newCount > 50 })
     .eq("id", laporanId);
 
   revalidatePath("/lapor");
@@ -227,12 +222,8 @@ export async function getLaporanPublik(params: {
     .neq("status", "DITOLAK")
     .range(offset, offset + limit - 1);
 
-  if (params.kategori) {
-    query = query.eq("kategori", params.kategori as import("@/lib/supabase/types").KategoriLaporan);
-  }
-  if (params.status) {
-    query = query.eq("status", params.status as import("@/lib/supabase/types").StatusLaporan);
-  }
+  if (params.kategori) query = query.eq("kategori", params.kategori as KategoriLaporan);
+  if (params.status) query = query.eq("status", params.status as StatusLaporan);
 
   query =
     params.sortBy === "upvote"
@@ -265,23 +256,22 @@ export async function getLaporanAdmin(params: {
   let query = supabase
     .from("laporan_warga")
     .select(
+      // FIX: field list sesuai schema — petugas_id & updated_at ada di DB
       "id, nomor_tiket, judul, kategori, deskripsi, foto_urls, lokasi_lat, lokasi_lng, status, upvote_count, is_prioritas_tinggi, is_anonim, nama_pelapor, email_pelapor, wa_pelapor, petugas_id, created_at, updated_at",
       { count: "exact" }
     )
     .eq("desa_id", params.desaId)
     .range(offset, offset + limit - 1);
 
-  if (params.status) {
-    query = query.eq("status", params.status as import("@/lib/supabase/types").StatusLaporan);
-  }
-  if (params.kategori) {
-    query = query.eq("kategori", params.kategori as import("@/lib/supabase/types").KategoriLaporan);
-  }
+  if (params.status) query = query.eq("status", params.status as StatusLaporan);
+  if (params.kategori) query = query.eq("kategori", params.kategori as KategoriLaporan);
 
   if (params.sortBy === "upvote") {
     query = query.order("upvote_count", { ascending: false });
   } else if (params.sortBy === "prioritas") {
-    query = query.order("is_prioritas_tinggi", { ascending: false }).order("created_at", { ascending: false });
+    query = query
+      .order("is_prioritas_tinggi", { ascending: false })
+      .order("created_at", { ascending: false });
   } else {
     query = query.order("created_at", { ascending: false });
   }
@@ -299,9 +289,7 @@ export async function getLaporanAdmin(params: {
 
 export async function getLaporanDetailAdmin(laporanId: string) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data: profile } = await supabase

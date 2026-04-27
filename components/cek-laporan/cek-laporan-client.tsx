@@ -27,7 +27,7 @@ const STATUS_ICON: Record<string, React.ReactNode> = {
   DITERIMA: <AlertCircle size={16} className="text-slate-500" />,
   DIVERIFIKASI: <Loader2 size={16} className="text-blue-500" />,
   DALAM_PROSES: <Clock size={16} className="text-amber-500" />,
-  SELESAI: <CheckCircle2 size={16} className="" style={{color:'#1E40AF'}}" />,
+  SELESAI: <CheckCircle2 size={16} className="" style={{color:'#1E40AF'}} />,
   DITOLAK: <XCircle size={16} className="text-red-500" />,
 };
 
@@ -61,7 +61,7 @@ export function CekLaporanClient({ initialTiket, laporan }: Props) {
         />
         <button
           type="submit"
-          className="px-5 py-3 text-white rounded-xl transition flex items-center gap-2 text-sm font-medium" style={{background:'#1E40AF'}}"
+          className="px-5 py-3 text-white rounded-xl transition flex items-center gap-2 text-sm font-medium" style={{background:'#1E40AF'}}
         >
           <Search size={15} />
           Cari

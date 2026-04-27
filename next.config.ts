@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "https://lgrndziebrlcsybuidfq.supabase.co",
+        hostname: "lgrndziebrlcsybuidfq.supabase.co",
       },
     ],
   },

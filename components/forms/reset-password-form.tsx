@@ -20,14 +20,14 @@ export function ResetPasswordForm() {
   if (status === "success") {
     return (
       <div className="text-center py-4">
-        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{background:'#DBEAFE',width:'3rem',height:'3rem',borderRadius:'50%'}}">
-          <span className="text-xl" style={{color:'#1E40AF'}}">✓</span>
+        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{background:'#DBEAFE',width:'3rem',height:'3rem',borderRadius:'50%'}}>
+          <span className="text-xl" style={{color:'#1E40AF'}}>✓</span>
         </div>
         <p className="text-sm font-medium text-slate-800 mb-1">Email terkirim!</p>
         <p className="text-sm text-slate-500 mb-6">
           Cek inbox Anda dan klik link reset password. Link berlaku 1 jam.
         </p>
-        <Link href="/login" className="text-sm hover:underline" style={{color:'#1E40AF'}}">
+        <Link href="/login" className="text-sm hover:underline" style={{color:'#1E40AF'}}>
           Kembali ke Login
         </Link>
       </div>
@@ -59,7 +59,7 @@ export function ResetPasswordForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-2.5 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors" style={{background:'#1E40AF'}}"
+        className="w-full py-2.5 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors" style={{background:'#1E40AF'}}
       >
         {isPending ? "Mengirim..." : "Kirim Link Reset"}
       </button>

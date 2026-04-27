@@ -261,7 +261,7 @@ export async function getRealisasiAnggaran(params: {
   return pagu.map((p) => {
     const realisasi = realisasiMap[p.kategori_id] ?? 0;
     const persentase = p.nominal > 0 ? Math.min((realisasi / p.nominal) * 100, 100) : 0;
-    const kategori = p.kategori_program as { nama: string; warna: string | null } | null;
+    const kategori = (Array.isArray(p.kategori_program) ? p.kategori_program[0] : p.kategori_program) as { nama: string; warna: string | null } | null;
     return {
       kategori_id: p.kategori_id,
       nama: kategori?.nama ?? "—",
