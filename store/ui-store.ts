@@ -1,7 +1,6 @@
 import { create } from "zustand";
 
 type UIStore = {
-  // Sidebar admin
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;

@@ -10,6 +10,7 @@ export type JenisTransaksi = "pemasukan" | "pengeluaran";
 export type KategoriLaporan = "INF" | "KES" | "PDD" | "LNG" | "PLY" | "KAM" | "LNY";
 export type StatusLaporan = "DITERIMA" | "DIVERIFIKASI" | "DALAM_PROSES" | "DITOLAK" | "SELESAI";
 export type UserRole = "super_admin" | "admin_desa" | "bpd";
+
 export type Database = {
   public: {
     Tables: {
@@ -31,17 +32,13 @@ export type Database = {
           kabupaten: string;
           provinsi?: string;
           logo_url?: string | null;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
-          id?: string;
           nama?: string;
           kecamatan?: string;
           kabupaten?: string;
           provinsi?: string;
           logo_url?: string | null;
-          updated_at?: string;
         };
         Relationships: [];
       };
@@ -63,8 +60,6 @@ export type Database = {
           role?: UserRole;
           is_active?: boolean;
           avatar_url?: string | null;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
           desa_id?: string;
@@ -72,7 +67,6 @@ export type Database = {
           role?: UserRole;
           is_active?: boolean;
           avatar_url?: string | null;
-          updated_at?: string;
         };
         Relationships: [];
       };
@@ -91,10 +85,8 @@ export type Database = {
           nama: string;
           deskripsi?: string | null;
           warna?: string | null;
-          created_at?: string;
         };
         Update: {
-          desa_id?: string;
           nama?: string;
           deskripsi?: string | null;
           warna?: string | null;
@@ -117,15 +109,10 @@ export type Database = {
           kategori_id: string;
           tahun: number;
           nominal: number;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
-          desa_id?: string;
-          kategori_id?: string;
-          tahun?: number;
           nominal?: number;
-          updated_at?: string;
+          tahun?: number;
         };
         Relationships: [];
       };
@@ -153,8 +140,6 @@ export type Database = {
           tanggal: string;
           bukti_url?: string | null;
           input_by: string;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
           jenis?: JenisTransaksi;
@@ -163,7 +148,6 @@ export type Database = {
           deskripsi?: string;
           tanggal?: string;
           bukti_url?: string | null;
-          updated_at?: string;
         };
         Relationships: [];
       };
@@ -209,8 +193,6 @@ export type Database = {
           is_prioritas_tinggi?: boolean;
           petugas_id?: string | null;
           ip_address?: string | null;
-          created_at?: string;
-          updated_at?: string;
         };
         Update: {
           judul?: string;
@@ -223,7 +205,6 @@ export type Database = {
           upvote_count?: number;
           is_prioritas_tinggi?: boolean;
           petugas_id?: string | null;
-          updated_at?: string;
         };
         Relationships: [];
       };
@@ -244,7 +225,6 @@ export type Database = {
           status_baru: StatusLaporan;
           catatan?: string | null;
           changed_by: string;
-          created_at?: string;
         };
         Update: never;
         Relationships: [];
@@ -262,7 +242,6 @@ export type Database = {
           laporan_id: string;
           fingerprint: string;
           ip_address?: string | null;
-          created_at?: string;
         };
         Update: never;
         Relationships: [];
@@ -288,7 +267,6 @@ export type Database = {
           old_data?: Json | null;
           new_data?: Json | null;
           ip_address?: string | null;
-          created_at?: string;
         };
         Update: never;
         Relationships: [];
@@ -302,15 +280,16 @@ export type Database = {
       };
       calculate_realisasi: {
         Args: { kategori_id_param: string; tahun_param: number };
-        Returns: { total_pengeluaran: number; pagu: number; persentase: number }[];
+        Returns: number;
       };
       check_pagu_warning: {
-        Args: { kategori_id_param: string; nominal_param: number; tahun_param: number };
+        Args: {
+          kategori_id_param: string;
+          nominal_param: number;
+          tahun_param: number;
+        };
         Returns: { is_warning: boolean; percentage: number; sisa_pagu: number }[];
       };
-      get_user_desa_id: { Args: Record<string, never>; Returns: string };
-      get_user_role: { Args: Record<string, never>; Returns: string };
-      is_admin: { Args: Record<string, never>; Returns: boolean };
     };
     Enums: {
       jenis_transaksi: JenisTransaksi;
@@ -321,8 +300,6 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
-
-// ─── Convenience Row Types ────────────────────────────────────────────────────
 
 export type Desa = Database["public"]["Tables"]["desa"]["Row"];
 export type UserProfile = Database["public"]["Tables"]["user_profiles"]["Row"];
@@ -338,3 +315,39 @@ export type TransaksiInsert = Database["public"]["Tables"]["transaksi"]["Insert"
 export type LaporanWargaInsert = Database["public"]["Tables"]["laporan_warga"]["Insert"];
 export type LaporanStatusLogInsert = Database["public"]["Tables"]["laporan_status_log"]["Insert"];
 export type UpvoteInsert = Database["public"]["Tables"]["upvotes"]["Insert"];
+
+export type TransaksiWithKategori = Transaksi & {
+  kategori_program: Pick<KategoriProgram, "nama" | "warna"> | null;
+};
+
+export type LaporanWithLog = LaporanWarga & {
+  laporan_status_log: (LaporanStatusLog & {
+    user_profiles: Pick<UserProfile, "nama"> | null;
+  })[];
+};
+
+export const KATEGORI_LAPORAN_LABEL: Record<KategoriLaporan, string> = {
+  INF: "Infrastruktur",
+  KES: "Kesehatan",
+  PDD: "Pendidikan",
+  LNG: "Lingkungan",
+  PLY: "Pelayanan",
+  KAM: "Keamanan",
+  LNY: "Lainnya",
+};
+
+export const STATUS_LAPORAN_LABEL: Record<StatusLaporan, string> = {
+  DITERIMA: "Diterima",
+  DIVERIFIKASI: "Diverifikasi",
+  DALAM_PROSES: "Dalam Proses",
+  DITOLAK: "Ditolak",
+  SELESAI: "Selesai",
+};
+
+export const STATUS_LAPORAN_COLOR: Record<StatusLaporan, string> = {
+  DITERIMA: "bg-slate-100 text-slate-600",
+  DIVERIFIKASI: "bg-blue-100 text-blue-700",
+  DALAM_PROSES: "bg-amber-100 text-amber-700",
+  DITOLAK: "bg-red-100 text-red-700",
+  SELESAI: "bg-emerald-100 text-emerald-700",
+};
