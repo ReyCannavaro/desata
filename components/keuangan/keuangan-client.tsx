@@ -161,7 +161,7 @@ export function KeuanganClient({ transaksi, summary, tahun, desaId }: Props) {
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Pemasukan", value: summary.totalPemasukan, icon: TrendingUp, c: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Total Pemasukan", value: summary.totalPemasukan, icon: TrendingUp, c: "text-blue-600", bg: "bg-blue-50" },
           { label: "Total Pengeluaran", value: summary.totalPengeluaran, icon: TrendingDown, c: "text-red-500", bg: "bg-red-50" },
           { label: "Saldo", value: summary.saldo, icon: Landmark, c: "text-blue-600", bg: "bg-blue-50" },
         ].map(({ label, value, icon: Icon, c, bg }) => (
@@ -382,7 +382,7 @@ export function KeuanganClient({ transaksi, summary, tahun, desaId }: Props) {
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-right whitespace-nowrap">
-                    <span className={`font-semibold ${t.jenis === "pemasukan" ? "text-emerald-600" : "text-red-500"}`}>
+                    <span className={`font-semibold ${t.jenis === "pemasukan" ? "text-blue-600" : "text-red-500"}`}>
                       {t.jenis === "pemasukan" ? "+" : "−"} {formatRupiah(t.nominal)}
                     </span>
                   </td>

@@ -27,7 +27,7 @@ const STATUS_ICON: Record<string, React.ReactNode> = {
   DITERIMA: <AlertCircle size={16} className="text-slate-500" />,
   DIVERIFIKASI: <Loader2 size={16} className="text-blue-500" />,
   DALAM_PROSES: <Clock size={16} className="text-amber-500" />,
-  SELESAI: <CheckCircle2 size={16} className="text-emerald-500" />,
+  SELESAI: <CheckCircle2 size={16} className="" style={{color:'#1E40AF'}}" />,
   DITOLAK: <XCircle size={16} className="text-red-500" />,
 };
 
@@ -35,7 +35,7 @@ const STATUS_BG: Record<string, string> = {
   DITERIMA: "bg-slate-100 text-slate-700",
   DIVERIFIKASI: "bg-blue-100 text-blue-700",
   DALAM_PROSES: "bg-amber-100 text-amber-700",
-  SELESAI: "bg-emerald-100 text-emerald-700",
+  SELESAI: "bg-blue-100 text-blue-700",
   DITOLAK: "bg-red-100 text-red-700",
 };
 
@@ -57,11 +57,11 @@ export function CekLaporanClient({ initialTiket, laporan }: Props) {
           value={tiket}
           onChange={(e) => setTiket(e.target.value.toUpperCase())}
           placeholder="Contoh: DES-20250415-0001"
-          className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm font-mono placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm font-mono placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           type="submit"
-          className="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition flex items-center gap-2 text-sm font-medium"
+          className="px-5 py-3 text-white rounded-xl transition flex items-center gap-2 text-sm font-medium" style={{background:'#1E40AF'}}"
         >
           <Search size={15} />
           Cari

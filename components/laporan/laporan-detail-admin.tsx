@@ -27,7 +27,7 @@ const STATUS_ICON: Record<StatusLaporan, React.ReactNode> = {
   DITERIMA: <AlertCircle size={14} className="text-slate-500" />,
   DIVERIFIKASI: <Loader2 size={14} className="text-blue-500" />,
   DALAM_PROSES: <Clock size={14} className="text-amber-500" />,
-  SELESAI: <CheckCircle2 size={14} className="text-emerald-500" />,
+  SELESAI: <CheckCircle2 size={14} className="text-blue-500" />,
   DITOLAK: <XCircle size={14} className="text-red-500" />,
 };
 
@@ -80,7 +80,7 @@ export function LaporanDetailAdmin({ laporanId, currentStatus, statusLog }: Prop
 
         {allowed.length === 0 ? (
           <div className="flex items-center gap-2 py-3 text-sm text-slate-500">
-            <CheckCircle2 size={16} className={status === "SELESAI" ? "text-emerald-500" : "text-red-400"} />
+            <CheckCircle2 size={16} className={status === "SELESAI" ? "text-blue-500" : "text-red-400"} />
             Laporan ini sudah berstatus <strong>{STATUS_LAPORAN_LABEL[status]}</strong> dan tidak dapat diubah lagi.
           </div>
         ) : (
@@ -140,7 +140,7 @@ export function LaporanDetailAdmin({ laporanId, currentStatus, statusLog }: Prop
             )}
 
             {successMsg && (
-              <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 text-sm text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
                 <CheckCircle2 size={14} />
                 {successMsg}
               </div>

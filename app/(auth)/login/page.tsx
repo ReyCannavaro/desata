@@ -20,7 +20,7 @@ export default async function LoginPage({
       </p>
 
       {params.message === "password-updated" && (
-        <div className="mb-5 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700">
+        <div className="mb-5 p-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-700">
           ✓ Password berhasil diperbarui. Silakan login.
         </div>
       )}

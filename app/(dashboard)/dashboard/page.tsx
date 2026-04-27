@@ -65,8 +65,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <TrendingUp size={18} className="text-emerald-600" />
+              <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+                <TrendingUp size={18} className="text-blue-600" />
               </div>
               <span className="text-sm text-slate-500">Total Pemasukan</span>
             </div>
@@ -133,7 +133,7 @@ export default async function DashboardPage() {
               label: "Selesai",
               value: laporanSelesai,
               icon: CheckCircle2,
-              color: "bg-emerald-50 text-emerald-600",
+              color: "bg-blue-50 text-blue-600",
             },
           ].map(({ label, value, icon: Icon, color }) => (
             <div
@@ -156,7 +156,7 @@ export default async function DashboardPage() {
             </h2>
             <a
               href="/laporan/admin"
-              className="text-xs text-emerald-600 hover:underline"
+              className="text-xs hover:underline" style={{color:"#1E40AF"}}
             >
               Lihat semua →
             </a>

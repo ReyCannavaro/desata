@@ -39,7 +39,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           autoComplete="email"
           required
           placeholder="admin@desata.id"
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
         />
       </div>
 
@@ -54,10 +54,10 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
           autoComplete="current-password"
           required
           placeholder="••••••••"
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
         />
         <div className="mt-1.5 text-right">
-          <Link href="/reset-password" className="text-xs text-emerald-600 hover:underline">
+          <Link href="/reset-password" className="text-xs hover:underline" style={{color:'#1E40AF'}}">
             Lupa password?
           </Link>
         </div>
@@ -73,7 +73,7 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors"
+        className="w-full py-2.5 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-colors" style={{background:'#1E40AF'}}"
       >
         {isPending ? "Memproses..." : "Masuk"}
       </button>

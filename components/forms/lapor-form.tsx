@@ -57,8 +57,8 @@ export function LaporForm({ desaId }: Props) {
   if (tiket) {
     return (
       <div className="text-center py-6 space-y-4">
-        <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-          <CheckCircle2 size={28} className="text-emerald-600" />
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto" style={{background:'#DBEAFE',width:'3.5rem',height:'3.5rem',borderRadius:'50%'}}">
+          <CheckCircle2 size={28} className="" style={{color:'#1E40AF'}}" />
         </div>
         <div>
           <p className="font-semibold text-slate-800 text-lg">Laporan Terkirim!</p>
@@ -73,7 +73,7 @@ export function LaporForm({ desaId }: Props) {
         <div className="flex gap-2 justify-center">
           <a
             href={`/cek-laporan?tiket=${tiket}`}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-xl transition"
+            className="px-5 py-2.5 text-white text-sm font-medium rounded-xl transition" style={{background:'#1E40AF'}}"
           >
             Pantau Laporan
           </a>
@@ -97,7 +97,7 @@ export function LaporForm({ desaId }: Props) {
         <select
           name="kategori"
           required
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">— Pilih kategori —</option>
           {KATEGORI_OPTIONS.map((opt) => (
@@ -119,7 +119,7 @@ export function LaporForm({ desaId }: Props) {
           minLength={10}
           maxLength={150}
           placeholder="Contoh: Jalan Rusak di RT 05 Depan SD"
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
@@ -134,7 +134,7 @@ export function LaporForm({ desaId }: Props) {
           maxLength={1000}
           rows={4}
           placeholder="Jelaskan masalah secara detail: lokasi, kondisi, dampak, dan harapan Anda..."
-          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+          className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
         />
         <p className="text-xs text-slate-400 mt-1">Minimal 30 karakter</p>
       </div>
@@ -145,7 +145,7 @@ export function LaporForm({ desaId }: Props) {
           id="anonim"
           checked={isAnonim}
           onChange={(e) => setIsAnonim(e.target.checked)}
-          className="w-4 h-4 accent-emerald-600"
+          className="w-4 h-4 accent-blue-600"
         />
         <label htmlFor="anonim" className="text-sm text-slate-600 cursor-pointer">
           Kirim sebagai <span className="font-medium">anonim</span> (nama & kontak tidak ditampilkan)
@@ -159,20 +159,20 @@ export function LaporForm({ desaId }: Props) {
             name="nama"
             type="text"
             placeholder="Nama lengkap"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <div className="grid grid-cols-2 gap-3">
             <input
               name="email"
               type="email"
               placeholder="Email (opsional)"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               name="wa"
               type="tel"
               placeholder="WhatsApp (opsional)"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <p className="text-[10px] text-slate-400">
@@ -191,7 +191,7 @@ export function LaporForm({ desaId }: Props) {
       <button
         type="submit"
         disabled={isPending}
-        className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium rounded-xl transition text-sm"
+        className="w-full py-3 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium rounded-xl transition text-sm" style={{background:'#1E40AF'}}"
       >
         {isPending ? "Mengirim Laporan..." : "Kirim Laporan"}
       </button>

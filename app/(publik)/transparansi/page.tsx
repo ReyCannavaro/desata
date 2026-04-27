@@ -43,11 +43,7 @@ export default async function TransparansiPage({
           <a
             key={t}
             href={`/transparansi?tahun=${t}`}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
-              t === tahun
-                ? "bg-emerald-600 text-white"
-                : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-            }`}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${t === tahun ? "text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`} style={t === tahun ? {background: "#1E40AF"} : {}}
           >
             {t}
           </a>
@@ -56,7 +52,7 @@ export default async function TransparansiPage({
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Total Pemasukan", value: summary.totalPemasukan, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" },
+          { label: "Total Pemasukan", value: summary.totalPemasukan, icon: TrendingUp, color: "text-blue-600", bg: "bg-blue-50" },
           { label: "Total Pengeluaran", value: summary.totalPengeluaran, icon: TrendingDown, color: "text-red-500", bg: "bg-red-50" },
           { label: "Saldo Saat Ini", value: summary.saldo, icon: Landmark, color: "text-blue-600", bg: "bg-blue-50" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
@@ -115,7 +111,7 @@ export default async function TransparansiPage({
                   <td className="px-5 py-3.5 text-right whitespace-nowrap">
                     <span
                       className={`font-semibold ${
-                        t.jenis === "pemasukan" ? "text-emerald-600" : "text-red-500"
+                        t.jenis === "pemasukan" ? "text-blue-600" : "text-red-500"
                       }`}
                     >
                       {t.jenis === "pemasukan" ? "+" : "−"} {formatRupiah(t.nominal)}

@@ -33,7 +33,6 @@ export function TopBar({ profile, title, subtitle, action }: TopBarProps) {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
         </button>
 
-        {/* Logout */}
         <form action={logoutAction}>
           <button
             type="submit"
