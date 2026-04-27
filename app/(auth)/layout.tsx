@@ -1,16 +1,16 @@
+import React from "react";
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-12">
+    <main className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: "#DBEAFE" }}>
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-base">D</span>
+          <div className="inline-flex items-center gap-3 mb-3">
+            <img src="/logo.svg" alt="DESATA" className="w-9 h-10" />
+            <div className="text-left">
+              <p className="text-xl font-bold leading-none" style={{ color: "#1E3A8A" }}>DESATA</p>
+              <p className="text-[10px] leading-tight" style={{ color: "#1E40AF" }}>Desa Kita, Data Kita, Masa Depan Kita.</p>
             </div>
-            <span className="text-2xl font-bold text-slate-900 tracking-tight">DESATA</span>
           </div>
-          <p className="text-sm text-slate-500">Desa Kita, Data Kita, Masa Depan Kita.</p>
         </div>
         {children}
       </div>
