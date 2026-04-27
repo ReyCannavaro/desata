@@ -8,6 +8,8 @@ import { z } from "zod";
 const LoginSchema = z.object({
   email: z.string().email("Format email tidak valid"),
   password: z.string().min(8, "Password minimal 8 karakter"),
+  // FIX: terima redirectTo dari form
+  redirectTo: z.string().optional(),
 });
 
 const ResetPasswordSchema = z.object({
@@ -27,17 +29,20 @@ export type ActionResult = {
   error?: string;
 };
 
-export async function loginAction(
-  formData: FormData
-): Promise<ActionResult> {
+export async function loginAction(formData: FormData): Promise<ActionResult> {
   const raw = {
     email: formData.get("email"),
     password: formData.get("password"),
+    // FIX: ambil redirectTo dari formData
+    redirectTo: formData.get("redirectTo") as string | undefined,
   };
 
   const parsed = LoginSchema.safeParse(raw);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Validasi gagal",
+    };
   }
 
   const supabase = await createClient();
@@ -49,16 +54,25 @@ export async function loginAction(
 
   if (error) {
     if (error.message.includes("Invalid login credentials")) {
-      return { success: false, error: "Email atau password salah. Periksa kembali." };
+      return {
+        success: false,
+        error: "Email atau password salah. Periksa kembali.",
+      };
     }
     if (error.message.includes("Email not confirmed")) {
-      return { success: false, error: "Email belum dikonfirmasi. Cek inbox Anda." };
+      return {
+        success: false,
+        error: "Email belum dikonfirmasi. Cek inbox Anda.",
+      };
     }
-    return { success: false, error: "Terjadi kesalahan. Coba lagi dalam beberapa saat." };
+    return {
+      success: false,
+      error: "Terjadi kesalahan. Coba lagi dalam beberapa saat.",
+    };
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(parsed.data.redirectTo ?? "/dashboard");
 }
 
 export async function logoutAction(): Promise<void> {
@@ -75,7 +89,10 @@ export async function resetPasswordAction(
   const parsed = ResetPasswordSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Validasi gagal",
+    };
   }
 
   const supabase = await createClient();
@@ -84,9 +101,7 @@ export async function resetPasswordAction(
     redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/update-password`,
   });
 
-  return {
-    success: true,
-  };
+  return { success: true };
 }
 
 export async function updatePasswordAction(
@@ -96,7 +111,10 @@ export async function updatePasswordAction(
   const parsed = UpdatePasswordSchema.safeParse(raw);
 
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Validasi gagal",
+    };
   }
 
   const supabase = await createClient();
@@ -110,13 +128,15 @@ export async function updatePasswordAction(
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard?message=password-updated");
+  redirect("/login?message=password-updated");
 }
 
 export async function getCurrentUser() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   if (!user) return null;
 
   const { data: profile } = await supabase

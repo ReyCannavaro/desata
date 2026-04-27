@@ -83,6 +83,27 @@ export async function updateTransaksiAction(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("desa_id, role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin_desa", "super_admin"].includes(profile.role)) {
+    return { success: false, error: "Akses ditolak" };
+  }
+
+  const { data: existing } = await supabase
+    .from("transaksi")
+    .select("desa_id")
+    .eq("id", id)
+    .single();
+
+  if (!existing) return { success: false, error: "Transaksi tidak ditemukan." };
+  if (existing.desa_id !== profile.desa_id) {
+    return { success: false, error: "Akses ditolak" };
+  }
+
   const { error } = await supabase
     .from("transaksi")
     .update(input)
@@ -100,13 +121,26 @@ export async function deleteTransaksiAction(id: string): Promise<ActionResult> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, error: "Tidak terautentikasi" };
 
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("desa_id, role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || !["admin_desa", "super_admin"].includes(profile.role)) {
+    return { success: false, error: "Akses ditolak" };
+  }
+
   const { data: transaksi } = await supabase
     .from("transaksi")
-    .select("id")
+    .select("id, desa_id")
     .eq("id", id)
     .single();
 
   if (!transaksi) return { success: false, error: "Transaksi tidak ditemukan." };
+  if (transaksi.desa_id !== profile.desa_id) {
+    return { success: false, error: "Akses ditolak" };
+  }
 
   const { error } = await supabase.from("transaksi").delete().eq("id", id);
 
@@ -184,10 +218,14 @@ export async function setPaguAnggaranAction(input: {
 
   if (!profile) return { success: false, error: "Profil tidak ditemukan" };
 
-  const { error } = await supabase.from("pagu_anggaran").upsert({
-    ...input,
-    desa_id: profile.desa_id,
-  });
+  // FIX: tambah onConflict supaya upsert benar-benar update jika sudah ada
+  const { error } = await supabase.from("pagu_anggaran").upsert(
+    {
+      ...input,
+      desa_id: profile.desa_id,
+    },
+    { onConflict: "desa_id,kategori_id,tahun" }
+  );
 
   if (error) return { success: false, error: "Gagal menyimpan pagu anggaran." };
 

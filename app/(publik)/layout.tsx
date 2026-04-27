@@ -1,54 +1,58 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/actions/auth";
-import { TopBar } from "@/components/layout/top-bar";
+import Link from "next/link";
 
-export const metadata: Metadata = { title: "Pengaturan" };
-
-export default async function PengaturanPage() {
-  const data = await getCurrentUser();
-  if (!data || !data.profile) redirect("/login");
-
-  const profile = data.profile as typeof data.profile & {
-    desa: { nama: string } | null;
-  };
-
+export default function PublikLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <>
-      <TopBar
-        user={data.user}
-        profile={profile}
-        title="Pengaturan"
-        subtitle="Kelola akun dan konfigurasi desa"
-      />
-      <main className="flex-1 p-6">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 max-w-lg">
-          <h2 className="text-sm font-semibold text-slate-800 mb-4">Profil Akun</h2>
-          <div className="space-y-3">
-            <div>
-              <p className="text-xs text-slate-500">Nama</p>
-              <p className="text-sm font-medium text-slate-700">{profile.nama}</p>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Navbar publik — tidak ada auth check di sini */}
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link href="/beranda" className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
+              <span className="text-white font-bold text-sm">D</span>
             </div>
-            <div>
-              <p className="text-xs text-slate-500">Role</p>
-              <p className="text-sm font-medium text-slate-700 capitalize">
-                {profile.role.replace("_", " ")}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-slate-500">Desa</p>
-              <p className="text-sm font-medium text-slate-700">
-                {profile.desa?.nama ?? "—"}
-              </p>
-            </div>
-          </div>
-          <div className="mt-6 pt-4 border-t border-slate-100">
-            <p className="text-xs text-slate-400">
-              Untuk mengubah email atau reset password, gunakan menu Lupa Password di halaman login.
-            </p>
-          </div>
+            <span className="font-bold text-slate-800 tracking-tight">DESATA</span>
+          </Link>
+
+          <nav className="flex items-center gap-1">
+            <Link
+              href="/transparansi"
+              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition"
+            >
+              Transparansi
+            </Link>
+            <Link
+              href="/lapor"
+              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition"
+            >
+              Lapor
+            </Link>
+            <Link
+              href="/cek-laporan"
+              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition"
+            >
+              Cek Status
+            </Link>
+            <Link
+              href="/login"
+              className="ml-2 px-4 py-1.5 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition"
+            >
+              Login
+            </Link>
+          </nav>
         </div>
-      </main>
-    </>
+      </header>
+
+      <main className="flex-1">{children}</main>
+
+      <footer className="border-t border-slate-100 py-6 bg-white">
+        <div className="max-w-6xl mx-auto px-4 text-center text-xs text-slate-400">
+          © {new Date().getFullYear()} DESATA — Desa Kita, Data Kita, Masa Depan Kita.
+        </div>
+      </footer>
+    </div>
   );
 }
