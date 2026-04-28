@@ -13,6 +13,8 @@ const PROTECTED = [
 
 const AUTH_ONLY = ["/login", "/reset-password", "/update-password"];
 
+const PUBLIK_DESA_ROUTES = ["/lapor", "/transparansi", "/cek-laporan", "/beranda"];
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -40,6 +42,21 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
+
+  const desaId = process.env.NEXT_PUBLIC_DESA_ID;
+  const isPublikDesaRoute = PUBLIK_DESA_ROUTES.some((r) =>
+    pathname.startsWith(r)
+  );
+
+  if (isPublikDesaRoute && desaId) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-desa-id", desaId);
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+
+    request.cookies.getAll().forEach(({ name, value }) => {
+      response.cookies.set(name, value);
+    });
+  }
 
   if (!user && PROTECTED.some((p) => pathname.startsWith(p))) {
     const url = request.nextUrl.clone();

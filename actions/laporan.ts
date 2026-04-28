@@ -6,6 +6,12 @@ import { z } from "zod";
 import type { ActionResult } from "./auth";
 import type { KategoriLaporan, StatusLaporan } from "@/lib/supabase/types";
 
+const emptyStringToNull = z
+  .string()
+  .transform((v) => (v.trim() === "" ? null : v.trim()))
+  .nullable()
+  .optional();
+
 const CreateLaporanSchema = z.object({
   judul: z.string().min(10, "Judul minimal 10 karakter").max(150),
   kategori: z.enum(["INF", "KES", "PDD", "LNG", "PLY", "KAM", "LNY"]),
@@ -13,12 +19,23 @@ const CreateLaporanSchema = z.object({
   foto_urls: z.array(z.string().url()).max(3).optional().default([]),
   lokasi_lat: z.number().optional().nullable(),
   lokasi_lng: z.number().optional().nullable(),
-  nama_pelapor: z.string().max(100).optional().nullable(),
-  email_pelapor: z.string().email().optional().nullable(),
-  wa_pelapor: z.string().optional().nullable(),
+  nama_pelapor: emptyStringToNull,
+  email_pelapor: z
+    .string()
+    .transform((v) => (v.trim() === "" ? null : v.trim()))
+    .nullable()
+    .optional()
+    .refine(
+      (v) => v === null || v === undefined || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+      "Format email tidak valid"
+    ),
+  wa_pelapor: emptyStringToNull,
   is_anonim: z.boolean().default(false),
-  desa_id: z.string().uuid(),
-  ip_address: z.string().optional().nullable(),
+  desa_id: z.string().regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    "ID desa tidak valid"
+  ),
+  ip_address: emptyStringToNull,
 });
 
 export type CreateLaporanInput = z.infer<typeof CreateLaporanSchema>;
@@ -33,7 +50,9 @@ export async function createLaporanAction(
 ): Promise<ActionResult & { nomorTiket?: string }> {
   const parsed = CreateLaporanSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
+    const errMsg = parsed.error.issues[0]?.message ?? "Validasi gagal";
+    console.error("[createLaporan] Validasi gagal:", parsed.error.issues);
+    return { success: false, error: errMsg };
   }
 
   const supabase = await createClient();
@@ -61,14 +80,26 @@ export async function createLaporanAction(
   );
 
   if (tiketError || !tiketData) {
-    return { success: false, error: "Gagal membuat nomor tiket. Coba lagi." };
+    console.error("[createLaporan] Gagal generate tiket:", tiketError);
+    return { success: false, error: "Gagal membuat nomor tiket. Pastikan function generate_nomor_tiket sudah ada di Supabase." };
   }
 
   const { data, error } = await supabase
     .from("laporan_warga")
     .insert({
-      ...parsed.data,
+      desa_id: parsed.data.desa_id,
       nomor_tiket: tiketData,
+      judul: parsed.data.judul,
+      kategori: parsed.data.kategori,
+      deskripsi: parsed.data.deskripsi,
+      foto_urls: parsed.data.foto_urls ?? [],
+      lokasi_lat: parsed.data.lokasi_lat ?? null,
+      lokasi_lng: parsed.data.lokasi_lng ?? null,
+      nama_pelapor: parsed.data.nama_pelapor ?? null,
+      email_pelapor: parsed.data.email_pelapor ?? null,
+      wa_pelapor: parsed.data.wa_pelapor ?? null,
+      is_anonim: parsed.data.is_anonim,
+      ip_address: parsed.data.ip_address ?? null,
       status: "DITERIMA" as StatusLaporan,
       upvote_count: 0,
       is_prioritas_tinggi: false,
@@ -77,8 +108,8 @@ export async function createLaporanAction(
     .single();
 
   if (error) {
-    console.error("createLaporan error:", error);
-    return { success: false, error: "Gagal mengirim laporan. Coba lagi." };
+    console.error("[createLaporan] Insert error:", error);
+    return { success: false, error: "Gagal mengirim laporan: " + error.message };
   }
 
   revalidatePath("/lapor");
@@ -256,7 +287,6 @@ export async function getLaporanAdmin(params: {
   let query = supabase
     .from("laporan_warga")
     .select(
-      // FIX: field list sesuai schema — petugas_id & updated_at ada di DB
       "id, nomor_tiket, judul, kategori, deskripsi, foto_urls, lokasi_lat, lokasi_lng, status, upvote_count, is_prioritas_tinggi, is_anonim, nama_pelapor, email_pelapor, wa_pelapor, petugas_id, created_at, updated_at",
       { count: "exact" }
     )
