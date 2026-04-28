@@ -21,6 +21,7 @@ import {
   STATUS_LAPORAN_COLOR,
   STATUS_LAPORAN_LABEL,
 } from "@/lib/supabase/types";
+import { DashboardRealtime } from "@/components/dashboard/dashboard-realtime";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -70,6 +71,8 @@ export default async function DashboardPage() {
         title="Dashboard"
         subtitle={`Ringkasan data ${profile.desa?.nama ?? "Desa"} — ${tahun}`}
       />
+
+      <DashboardRealtime desaId={desaId} />
 
       <main className="flex-1 p-6 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

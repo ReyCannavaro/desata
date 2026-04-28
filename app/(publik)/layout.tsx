@@ -18,6 +18,12 @@ export default function PublikLayout({ children }: { children: React.ReactNode }
               Transparansi
             </Link>
             <Link
+              href="/laporan"
+              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-blue-50 rounded-lg transition"
+            >
+              Laporan Warga
+            </Link>
+            <Link
               href="/lapor"
               className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-blue-50 rounded-lg transition"
             >
