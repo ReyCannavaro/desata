@@ -98,7 +98,7 @@ export default async function LaporanPublikPage({
           )}
         </Link>
         <Link
-          href="/laporan?tab=buat"
+          href="/laporan-warga?tab=buat"
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
             tab === "buat"
               ? "bg-white text-slate-800 shadow-sm"
@@ -145,14 +145,16 @@ export default async function LaporanPublikPage({
             </span>
           </div>
 
+          {/* Realtime */}
           {desaId && <LaporanRealtime desaId={desaId} />}
 
+          {/* List */}
           <div className="space-y-3">
             {result.laporan.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
                 <p className="text-sm text-slate-500">Belum ada laporan yang ditemukan.</p>
                 <Link
-                  href="/laporan?tab=buat"
+                  href="/laporan-warga?tab=buat"
                   className="inline-block mt-4 text-sm font-medium underline"
                   style={{ color: "#1E40AF" }}
                 >
@@ -166,6 +168,7 @@ export default async function LaporanPublikPage({
                   className="bg-white rounded-2xl border border-slate-100 p-5 hover:border-slate-200 transition"
                 >
                   <div className="flex items-start gap-3">
+                    {/* Upvote button */}
                     <div className="flex-shrink-0 pt-0.5">
                       <UpvoteButton laporanId={l.id} initialCount={l.upvote_count} />
                     </div>
