@@ -67,7 +67,7 @@ export default async function LaporanPublikPage({
       ...(page > 1        ? { page: String(page) }        : {}),
       ...overrides,
     });
-    return `/laporan?${p.toString()}`;
+    return `/laporan-warga?${p.toString()}`;
   }
 
   return (
@@ -145,10 +145,7 @@ export default async function LaporanPublikPage({
             </span>
           </div>
 
-          {/* Realtime */}
           {desaId && <LaporanRealtime desaId={desaId} />}
-
-          {/* List */}
           <div className="space-y-3">
             {result.laporan.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
