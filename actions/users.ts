@@ -1,13 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import type { ActionResult } from "./auth";
 
 const CreateUserSchema = z.object({
   email: z.string().email("Format email tidak valid"),
-  password: z.string().min(8, "Password minimal 8 karakter"),
+  password: z
+    .string()
+    .min(8, "Password minimal 8 karakter")
+    .regex(/[A-Z]/, "Harus mengandung minimal 1 huruf besar")
+    .regex(/[0-9]/, "Harus mengandung minimal 1 angka"),
   nama: z.string().min(2, "Nama minimal 2 karakter").max(100),
   role: z.enum(["admin_desa", "bpd"]),
 });
@@ -18,12 +22,32 @@ const UpdateUserSchema = z.object({
   is_active: z.boolean().optional(),
 });
 
+async function requireSuperAdmin() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Tidak terautentikasi", supabase: null, callerProfile: null };
+
+  const { data: callerProfile } = await supabase
+    .from("user_profiles")
+    .select("role, desa_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!callerProfile || callerProfile.role !== "super_admin") {
+    return { error: "Hanya super admin yang dapat melakukan aksi ini", supabase: null, callerProfile: null };
+  }
+
+  return { error: null, supabase, callerProfile };
+}
+
 export async function getUsersAction(desaId: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("user_profiles")
-    .select("*")
+    .select("id, nama, role, is_active, created_at")
     .eq("desa_id", desaId)
     .order("created_at", { ascending: false });
 
@@ -39,25 +63,39 @@ export async function createUserAction(
     return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
-  const supabase = await createClient();
-
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Tidak terautentikasi" };
-
-  const { data: callerProfile } = await supabase
-    .from("user_profiles")
-    .select("role, desa_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!callerProfile || callerProfile.role !== "super_admin") {
-    return { success: false, error: "Hanya super admin yang dapat membuat pengguna baru" };
+  const { error: authError, supabase, callerProfile } = await requireSuperAdmin();
+  if (authError || !supabase || !callerProfile) {
+    return { success: false, error: authError ?? "Akses ditolak" };
   }
 
+  const { data: existingProfile } = await supabase
+    .from("user_profiles")
+    .select("id")
+    .eq("desa_id", callerProfile.desa_id)
+    .limit(1)
+    .maybeSingle();
+
+  const adminClient = await createAdminClient();
+  const { data: authData, error: createAuthError } =
+    await adminClient.auth.admin.createUser({
+      email: parsed.data.email,
+      password: parsed.data.password,
+      email_confirm: true,
+    });
+
+  if (createAuthError || !authData.user) {
+    if (createAuthError?.message?.includes("already been registered")) {
+      return { success: false, error: "Email sudah terdaftar di sistem." };
+    }
+    console.error("createUser auth error:", createAuthError);
+    return { success: false, error: "Gagal membuat akun. Coba lagi." };
+  }
+
+  const newUserId = authData.user.id;
   const { data: newProfile, error: profileError } = await supabase
     .from("user_profiles")
     .insert({
-      id: crypto.randomUUID(),
+      id: newUserId,
       desa_id: callerProfile.desa_id,
       nama: parsed.data.nama,
       role: parsed.data.role,
@@ -67,8 +105,12 @@ export async function createUserAction(
     .single();
 
   if (profileError) {
-    return { success: false, error: "Gagal membuat pengguna. " + profileError.message };
+    await adminClient.auth.admin.deleteUser(newUserId);
+    console.error("createUser profile error:", profileError);
+    return { success: false, error: "Gagal menyimpan profil pengguna. " + profileError.message };
   }
+
+  void existingProfile;
 
   revalidatePath("/pengaturan");
   return { success: true, userId: newProfile.id };
@@ -83,18 +125,9 @@ export async function updateUserAction(
     return { success: false, error: parsed.error.issues[0]?.message ?? "Validasi gagal" };
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Tidak terautentikasi" };
-
-  const { data: callerProfile } = await supabase
-    .from("user_profiles")
-    .select("role, desa_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!callerProfile || callerProfile.role !== "super_admin") {
-    return { success: false, error: "Akses ditolak" };
+  const { error: authError, supabase, callerProfile } = await requireSuperAdmin();
+  if (authError || !supabase || !callerProfile) {
+    return { success: false, error: authError ?? "Akses ditolak" };
   }
 
   const { error } = await supabase
@@ -110,22 +143,16 @@ export async function updateUserAction(
 }
 
 export async function deactivateUserAction(userId: string): Promise<ActionResult> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return { success: false, error: "Tidak terautentikasi" };
-
-  if (userId === user.id) {
-    return { success: false, error: "Tidak dapat menonaktifkan akun sendiri." };
+  const { error: authError, supabase, callerProfile } = await requireSuperAdmin();
+  if (authError || !supabase || !callerProfile) {
+    return { success: false, error: authError ?? "Akses ditolak" };
   }
 
-  const { data: callerProfile } = await supabase
-    .from("user_profiles")
-    .select("role, desa_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!callerProfile || callerProfile.role !== "super_admin") {
-    return { success: false, error: "Akses ditolak" };
+  const {
+    data: { user: me },
+  } = await supabase.auth.getUser();
+  if (me && userId === me.id) {
+    return { success: false, error: "Tidak dapat menonaktifkan akun sendiri." };
   }
 
   const { error } = await supabase
@@ -135,6 +162,24 @@ export async function deactivateUserAction(userId: string): Promise<ActionResult
     .eq("desa_id", callerProfile.desa_id);
 
   if (error) return { success: false, error: "Gagal menonaktifkan pengguna." };
+
+  revalidatePath("/pengaturan");
+  return { success: true };
+}
+
+export async function reactivateUserAction(userId: string): Promise<ActionResult> {
+  const { error: authError, supabase, callerProfile } = await requireSuperAdmin();
+  if (authError || !supabase || !callerProfile) {
+    return { success: false, error: authError ?? "Akses ditolak" };
+  }
+
+  const { error } = await supabase
+    .from("user_profiles")
+    .update({ is_active: true })
+    .eq("id", userId)
+    .eq("desa_id", callerProfile.desa_id);
+
+  if (error) return { success: false, error: "Gagal mengaktifkan pengguna." };
 
   revalidatePath("/pengaturan");
   return { success: true };

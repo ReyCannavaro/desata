@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import { getKeuanganPublik } from "@/actions/keuangan";
+import { getPublikDesaIdSafe } from "@/lib/get-desa-id"; // FIX #03
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { TrendingUp, TrendingDown, Landmark } from "lucide-react";
 
 export const metadata: Metadata = { title: "Transparansi Keuangan — DESATA" };
-
-const DEMO_DESA_ID = "11111111-1111-1111-1111-111111111111";
 
 function formatRupiah(num: number) {
   if (num >= 1_000_000_000) return `Rp ${(num / 1_000_000_000).toFixed(2)} M`;
@@ -22,10 +21,14 @@ export default async function TransparansiPage({
   const params = await searchParams;
   const tahun = params.tahun ? parseInt(params.tahun) : new Date().getFullYear();
 
-  const keuangan = await getKeuanganPublik({
-    desaId: DEMO_DESA_ID,
-    tahun,
-  }).catch(() => ({ transaksi: [], summary: { totalPemasukan: 0, totalPengeluaran: 0, saldo: 0 } }));
+  const desaId = await getPublikDesaIdSafe();
+
+  const keuangan = desaId
+    ? await getKeuanganPublik({ desaId, tahun }).catch(() => ({
+        transaksi: [],
+        summary: { totalPemasukan: 0, totalPengeluaran: 0, saldo: 0 },
+      }))
+    : { transaksi: [], summary: { totalPemasukan: 0, totalPengeluaran: 0, saldo: 0 } };
 
   const { transaksi, summary } = keuangan;
 
@@ -38,12 +41,21 @@ export default async function TransparansiPage({
         </p>
       </div>
 
+      {!desaId && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+          Konfigurasi desa belum diatur. Hubungi administrator.
+        </div>
+      )}
+
       <div className="flex gap-2">
         {[tahun - 1, tahun].map((t) => (
           <a
             key={t}
             href={`/transparansi?tahun=${t}`}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${t === tahun ? "text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`} style={t === tahun ? {background: "#1E40AF"} : {}}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+              t === tahun ? "text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+            style={t === tahun ? { background: "#1E40AF" } : {}}
           >
             {t}
           </a>
@@ -92,13 +104,14 @@ export default async function TransparansiPage({
                   <td className="px-5 py-3.5 text-slate-700 max-w-xs">{t.deskripsi}</td>
                   <td className="px-5 py-3.5">
                     <span className="flex items-center gap-1.5">
-                      {(t as typeof t & { kategori_program?: { nama: string; warna: string } | null })
+                      {(t as typeof t & { kategori_program?: { warna: string } | null })
                         .kategori_program?.warna && (
                         <span
                           className="w-2 h-2 rounded-full"
                           style={{
-                            background: (t as typeof t & { kategori_program?: { warna: string } | null })
-                              .kategori_program?.warna ?? "#94A3B8",
+                            background:
+                              (t as typeof t & { kategori_program?: { warna: string } | null })
+                                .kategori_program?.warna ?? "#94A3B8",
                           }}
                         />
                       )}

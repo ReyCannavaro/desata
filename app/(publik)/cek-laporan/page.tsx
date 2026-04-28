@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { getLaporanByTiket } from "@/actions/laporan";
 import { CekLaporanClient } from "@/components/cek-laporan/cek-laporan-client";
-
 export const metadata: Metadata = {
   title: "Cek Status Laporan — DESATA",
   description: "Pantau perkembangan laporan pengaduan warga desa.",
 };
-
-const DEMO_DESA_ID = "11111111-1111-1111-1111-111111111111";
 
 export default async function CekLaporanPage({
   searchParams,
@@ -17,7 +14,6 @@ export default async function CekLaporanPage({
   const params = await searchParams;
   const tiket = params.tiket?.trim().toUpperCase();
   const laporan = tiket ? await getLaporanByTiket(tiket) : null;
-  void DEMO_DESA_ID;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
@@ -29,7 +25,7 @@ export default async function CekLaporanPage({
       </div>
 
       <CekLaporanClient
-        laporan={laporan as any}
+        laporan={laporan as Parameters<typeof CekLaporanClient>[0]["laporan"]}
         initialTiket={tiket}
       />
     </div>
