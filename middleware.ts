@@ -13,7 +13,13 @@ const PROTECTED = [
 
 const AUTH_ONLY = ["/login", "/reset-password", "/update-password"];
 
-const PUBLIK_DESA_ROUTES = ["/laporan-warga", "/lapor", "/transparansi", "/cek-laporan", "/beranda"];
+const PUBLIK_DESA_ROUTES = [
+  "/laporan-warga",
+  "/lapor",
+  "/transparansi",
+  "/cek-laporan",
+  "/beranda",
+];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
