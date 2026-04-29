@@ -36,7 +36,7 @@ export default async function TransparansiPage({
           summary: { totalPemasukan: 0, totalPengeluaran: 0, saldo: 0 },
         }),
     desaId
-      ? getLaporanPublik({ desaId, sortBy: "terbaru" }).catch(() => ({
+      ? getLaporanPublik({ desaId, sortBy: "terbaru", fetchAll: true }).catch(() => ({
           laporan: [],
           total: 0,
           page: 1,

@@ -67,7 +67,7 @@ export default async function LaporanPublikPage({
       ...(page > 1        ? { page: String(page) }        : {}),
       ...overrides,
     });
-    return `/laporan-warga?${p.toString()}`;
+    return `/laporan?${p.toString()}`;
   }
 
   return (
@@ -112,7 +112,6 @@ export default async function LaporanPublikPage({
 
       {tab === "daftar" && (
         <>
-          {/* Filter & sort */}
           <div className="flex items-center gap-1.5 flex-wrap">
             <ListFilter size={13} className="text-slate-400" />
             {STATUS_OPTIONS.map((o) => (
@@ -144,8 +143,9 @@ export default async function LaporanPublikPage({
               ))}
             </span>
           </div>
-
           {desaId && <LaporanRealtime desaId={desaId} />}
+
+          {/* List */}
           <div className="space-y-3">
             {result.laporan.length === 0 ? (
               <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
@@ -165,7 +165,6 @@ export default async function LaporanPublikPage({
                   className="bg-white rounded-2xl border border-slate-100 p-5 hover:border-slate-200 transition"
                 >
                   <div className="flex items-start gap-3">
-                    {/* Upvote button */}
                     <div className="flex-shrink-0 pt-0.5">
                       <UpvoteButton laporanId={l.id} initialCount={l.upvote_count} />
                     </div>
@@ -229,9 +228,10 @@ export default async function LaporanPublikPage({
         <>
           {!desaId ? (
             <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
-              <p className="font-medium text-amber-800">Layanan Laporan Tidak Tersedia</p>
+              <p className="font-medium text-amber-800">Konfigurasi Desa Belum Lengkap</p>
               <p className="text-sm text-amber-600 mt-1">
-                Konfigurasi desa belum diatur. Hubungi administrator.
+                Variabel <code className="font-mono bg-amber-100 px-1 rounded">NEXT_PUBLIC_DESA_ID</code> belum diset.
+                Hubungi administrator desa.
               </p>
             </div>
           ) : (

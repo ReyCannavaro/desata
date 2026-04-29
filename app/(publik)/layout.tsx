@@ -1,43 +1,47 @@
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 
 export default function PublikLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen flex flex-col" style={{ background: "#F8FAFC" }}>
 
-          <Link href="/beranda" className="flex items-center">
-            <img src="/logo-nav.svg" alt="DESATA" className="h-8" />
+      <header className="bg-white border-b border-slate-100 sticky top-0 z-30 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+
+          <Link href="/beranda" className="flex items-center gap-2.5 flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "#1E3A8A" }}>
+              <MapPin size={15} className="text-white" />
+            </div>
+            <span className="font-bold text-slate-800 text-base tracking-tight">DESATA</span>
           </Link>
 
           <nav className="flex items-center gap-1">
-            <Link
-              href="/transparansi"
-              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-blue-50 rounded-lg transition"
-            >
-              Transparansi
-            </Link>
+            {[
+              { href: "/beranda",      label: "Beranda" },
+              { href: "/transparansi", label: "Transparansi" },
+              { href: "/cek-laporan",  label: "Cek Status" },
+            ].map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl transition"
+              >
+                {label}
+              </Link>
+            ))}
+
+            <div className="w-px h-5 bg-slate-200 mx-2" />
+
             <Link
               href="/laporan-warga"
-              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-blue-50 rounded-lg transition"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition border border-blue-100 text-blue-700 bg-blue-50 hover:bg-blue-100"
             >
-              Laporan Warga
+              Kirim Laporan
             </Link>
-            <Link
-              href="/lapor"
-              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-blue-50 rounded-lg transition"
-            >
-              Lapor
-            </Link>
-            <Link
-              href="/cek-laporan"
-              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-blue-50 rounded-lg transition"
-            >
-              Cek Status
-            </Link>
+
             <Link
               href="/login"
-              className="ml-3 px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors"
+              className="flex items-center gap-2 ml-1 px-4 py-2 text-sm font-semibold text-white rounded-xl transition hover:opacity-90"
               style={{ background: "#1E40AF" }}
             >
               Login Perangkat Desa
@@ -48,9 +52,15 @@ export default function PublikLayout({ children }: { children: React.ReactNode }
 
       <main className="flex-1">{children}</main>
 
+      {/* ── Footer ── */}
       <footer className="border-t border-slate-100 py-8 bg-white">
         <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <img src="/logo-nav.svg" alt="DESATA" className="h-7 opacity-70" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "#1E3A8A" }}>
+              <MapPin size={13} className="text-white" />
+            </div>
+            <span className="font-bold text-slate-700 text-sm">DESATA</span>
+          </div>
           <p className="text-xs text-slate-400">
             © {new Date().getFullYear()} DESATA — Desa Kita, Data Kita, Masa Depan Kita.
           </p>
