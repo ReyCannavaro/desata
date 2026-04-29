@@ -5,7 +5,6 @@ import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import type { ActionResult } from "./auth";
 import type { KategoriLaporan, StatusLaporan } from "@/lib/supabase/types";
-import { sendEmailLaporanMasuk } from "@/lib/email/send-laporan";
 
 const emptyStringToNull = z
   .string()
@@ -115,18 +114,6 @@ export async function createLaporanAction(
 
   revalidatePath("/lapor");
   revalidatePath("/dashboard");
-
-  // Kirim notifikasi email ke admin — fire and forget
-  void sendEmailLaporanMasuk({
-    desaId: parsed.data.desa_id,
-    nomorTiket: data.nomor_tiket,
-    judul: parsed.data.judul,
-    kategori: parsed.data.kategori as KategoriLaporan,
-    deskripsi: parsed.data.deskripsi,
-    namaPelapor: parsed.data.nama_pelapor ?? null,
-    isAnonim: parsed.data.is_anonim,
-  });
-
   return { success: true, nomorTiket: data.nomor_tiket };
 }
 
@@ -250,6 +237,7 @@ export async function getLaporanPublik(params: {
   kategori?: string;
   status?: string;
   sortBy?: "terbaru" | "upvote";
+  fetchAll?: boolean;
 }) {
   const supabase = await createClient();
   const page = params.page ?? 1;
@@ -263,8 +251,11 @@ export async function getLaporanPublik(params: {
       { count: "exact" }
     )
     .eq("desa_id", params.desaId)
-    .neq("status", "DITOLAK")
-    .range(offset, offset + limit - 1);
+    .neq("status", "DITOLAK");
+
+  if (!params.fetchAll) {
+    query = query.range(offset, offset + limit - 1) as typeof query;
+  }
 
   if (params.kategori) query = query.eq("kategori", params.kategori as KategoriLaporan);
   if (params.status) query = query.eq("status", params.status as StatusLaporan);
