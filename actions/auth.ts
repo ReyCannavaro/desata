@@ -8,8 +8,7 @@ import { z } from "zod";
 const LoginSchema = z.object({
   email: z.string().email("Format email tidak valid"),
   password: z.string().min(8, "Password minimal 8 karakter"),
-  // FIX: terima redirectTo dari form
-  redirectTo: z.string().optional(),
+  redirectTo: z.string().nullable().optional(),
 });
 
 const ResetPasswordSchema = z.object({
@@ -33,8 +32,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   const raw = {
     email: formData.get("email"),
     password: formData.get("password"),
-    // FIX: ambil redirectTo dari formData
-    redirectTo: formData.get("redirectTo") as string | undefined,
+    redirectTo: formData.get("redirectTo"),
   };
 
   const parsed = LoginSchema.safeParse(raw);
