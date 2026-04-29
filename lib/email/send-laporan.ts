@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/server";
-import { resend, EMAIL_FROM } from "./resend";
+import { getResend, EMAIL_FROM } from "./resend";
 import { templateLaporanMasuk, type LaporanEmailData } from "./templates";
 import type { KategoriLaporan } from "@/lib/supabase/types";
 
@@ -57,7 +57,7 @@ export async function sendEmailLaporanMasuk(params: {
       appUrl,
     };
 
-    await resend.emails.send({
+    await getResend().emails.send({
       from: EMAIL_FROM,
       to: adminEmails,
       subject: `[${params.nomorTiket}] Laporan Baru: ${params.judul}`,
