@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import type { ActionResult } from "./auth";
 import type { KategoriLaporan, StatusLaporan } from "@/lib/supabase/types";
+import { sendEmailLaporanMasuk } from "@/lib/email/send-laporan";
 
 const emptyStringToNull = z
   .string()
@@ -114,6 +115,18 @@ export async function createLaporanAction(
 
   revalidatePath("/lapor");
   revalidatePath("/dashboard");
+
+  // Kirim notifikasi email ke admin — fire and forget
+  void sendEmailLaporanMasuk({
+    desaId: parsed.data.desa_id,
+    nomorTiket: data.nomor_tiket,
+    judul: parsed.data.judul,
+    kategori: parsed.data.kategori as KategoriLaporan,
+    deskripsi: parsed.data.deskripsi,
+    namaPelapor: parsed.data.nama_pelapor ?? null,
+    isAnonim: parsed.data.is_anonim,
+  });
+
   return { success: true, nomorTiket: data.nomor_tiket };
 }
 
