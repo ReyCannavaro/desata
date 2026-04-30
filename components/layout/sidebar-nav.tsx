@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useTransition } from "react";
 import {
   LayoutDashboard, Globe, Wallet, ClipboardList,
   BarChart3, FolderOpen, Settings, ChevronRight, LogOut,
@@ -24,6 +25,15 @@ const MENU_LAINNYA = [
 
 export function SidebarNav({ profile }: Props) {
   const pathname = usePathname() ?? "";
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  function handleLogout() {
+    startTransition(async () => {
+      await logoutAction();
+      router.push("/login");
+    });
+  }
 
   return (
     <aside
@@ -104,15 +114,14 @@ export function SidebarNav({ profile }: Props) {
             </p>
           </div>
         </div>
-        <form action={logoutAction}>
-          <button
-            type="submit"
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition"
-          >
-            <LogOut size={13} />
-            Keluar
-          </button>
-        </form>
+        <button
+          onClick={handleLogout}
+          disabled={pending}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition disabled:opacity-50"
+        >
+          <LogOut size={13} />
+          {pending ? "Keluar..." : "Keluar"}
+        </button>
       </div>
     </aside>
   );
