@@ -31,7 +31,7 @@ export function SidebarNav({ profile }: Props) {
   function handleLogout() {
     startTransition(async () => {
       await logoutAction();
-      router.push("/login");
+      router.push("/beranda");
     });
   }
 
