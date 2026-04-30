@@ -67,7 +67,7 @@ export default async function LaporanPublikPage({
       ...(page > 1        ? { page: String(page) }        : {}),
       ...overrides,
     });
-    return `/laporan?${p.toString()}`;
+    return `/lapor?${p.toString()}`;
   }
 
   return (
@@ -98,7 +98,7 @@ export default async function LaporanPublikPage({
           )}
         </Link>
         <Link
-          href="/laporan?tab=buat"
+          href="/lapor?tab=buat"
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition ${
             tab === "buat"
               ? "bg-white text-slate-800 shadow-sm"
@@ -152,7 +152,7 @@ export default async function LaporanPublikPage({
               <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
                 <p className="text-sm text-slate-500">Belum ada laporan yang ditemukan.</p>
                 <Link
-                  href="/laporan?tab=buat"
+                  href="/lapor?tab=buat"
                   className="inline-block mt-4 text-sm font-medium underline"
                   style={{ color: "#1E40AF" }}
                 >

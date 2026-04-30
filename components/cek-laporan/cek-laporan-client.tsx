@@ -108,7 +108,7 @@ export function CekLaporanClient({ initialTiket, laporan }: Props) {
               )}
             </div>
 
-            <p className="mt-3 text-sm text-slate-600 leading-relaxed">{laporan.deskripsi}</p>
+            <p className="mt-3 text-sm text-slate-600 leading-relaxed break-words line-clamp-4">{laporan.deskripsi}</p>
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">

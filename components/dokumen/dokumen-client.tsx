@@ -75,7 +75,6 @@ export function DokumenClient({ dokumen }: Props) {
   return (
     <>
       <div className="flex flex-wrap gap-3 mb-6">
-        {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -170,6 +169,7 @@ export function DokumenClient({ dokumen }: Props) {
                   </span>
                 </div>
 
+                {/* Info */}
                 <div className="p-4">
                   <p className="text-sm font-semibold text-slate-800 line-clamp-1">{d.deskripsi}</p>
                   <p className="text-xs text-slate-400 mt-0.5">

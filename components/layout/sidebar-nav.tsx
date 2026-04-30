@@ -3,8 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Globe, Wallet, ClipboardList,
-  BarChart3, FolderOpen, Settings, ChevronRight,
-  LogOut, MapPin,
+  BarChart3, FolderOpen, Settings, ChevronRight, LogOut,
 } from "lucide-react";
 import type { UserProfile } from "@/lib/supabase/types";
 import { logoutAction } from "@/actions/auth";
@@ -32,20 +31,12 @@ export function SidebarNav({ profile }: Props) {
       style={{ background: "linear-gradient(180deg, #1E3A8A 0%, #1E2D6B 100%)" }}
     >
       <div className="px-5 pt-6 pb-5 border-b border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.15)" }}>
-            <MapPin size={17} className="text-white" />
-          </div>
-          <div>
-            <p className="text-white font-bold text-base tracking-wide leading-none">DESATA</p>
-            <p className="text-white/50 text-[10px] mt-0.5 truncate max-w-[130px]">
-              {profile.desa?.nama ?? "Desa"}
-            </p>
-          </div>
-        </div>
+        <img src="/logo-nav.svg" alt="DESATA" className="h-8 brightness-0 invert" />
+        <p className="text-white/45 text-[10px] mt-2 truncate">
+          {profile.desa?.nama ?? "Desa"}
+        </p>
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 px-3 py-5 space-y-6 overflow-y-auto">
         <div>
           <p className="text-white/40 text-[9px] font-bold uppercase tracking-[0.15em] px-3 mb-2">
@@ -59,9 +50,7 @@ export function SidebarNav({ profile }: Props) {
                   key={href}
                   href={href}
                   className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    active
-                      ? "text-white shadow-sm"
-                      : "text-white/65 hover:text-white hover:bg-white/8"
+                    active ? "text-white" : "text-white/65 hover:text-white hover:bg-white/8"
                   }`}
                   style={active ? { background: "rgba(255,255,255,0.18)" } : {}}
                 >
@@ -86,9 +75,7 @@ export function SidebarNav({ profile }: Props) {
                   key={href}
                   href={href}
                   className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                    active
-                      ? "text-white"
-                      : "text-white/65 hover:text-white hover:bg-white/8"
+                    active ? "text-white" : "text-white/65 hover:text-white hover:bg-white/8"
                   }`}
                   style={active ? { background: "rgba(255,255,255,0.18)" } : {}}
                 >
