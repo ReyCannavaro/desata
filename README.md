@@ -1,7 +1,6 @@
 <div align="center">
   <img src="public/logo-nav.svg" alt="DESATA Logo" height="60" />
   <br /><br />
-  <h1>DESATA</h1>
   <p><strong>Desa Kita, Data Kita, Masa Depan Kita</strong></p>
   <p>Platform transparansi keuangan dan aspirasi masyarakat desa berbasis web modern</p>
 
