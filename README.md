@@ -1,6 +1,7 @@
 <div align="center">
   <img src="public/logo-nav.svg" alt="DESATA Logo" height="60" />
   <br /><br />
+  <h1>DESATA</h1>
   <p><strong>Desa Kita, Data Kita, Masa Depan Kita</strong></p>
   <p>Platform transparansi keuangan dan aspirasi masyarakat desa berbasis web modern</p>
 
@@ -540,11 +541,13 @@ user_profiles:
 4. Di bagian **Environment Variables**, tambahkan semua variable dari `.env.local`:
 
 ```
-NEXT_PUBLIC_SUPABASE_URL        = https://lgrndziebrlcsybuidfq.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY   = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxncm5kemllYnJsY3N5YnVpZGZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxODU1NTEsImV4cCI6MjA5Mjc2MTU1MX0.dy1Mb2XyPFn2l2glgSHiLYCN_sRVv5Cbyje9TtP1FE8
-SUPABASE_SERVICE_ROLE_KEY       = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxncm5kemllYnJsY3N5YnVpZGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzE4NTU1MSwiZXhwIjoyMDkyNzYxNTUxfQ.xE_BzEBrOcA_Focvw1xRnVd2Yi2IB0eCDmSjHAwF5vc
+NEXT_PUBLIC_SUPABASE_URL        = https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY   = eyJ...
+SUPABASE_SERVICE_ROLE_KEY       = eyJ...
 NEXT_PUBLIC_APP_URL             = https://desata.vercel.app
-NEXT_PUBLIC_DESA_ID             = 352f0635-59a4-41ab-9e7a-1f6a586f41c8
+NEXT_PUBLIC_DESA_ID             = uuid-desa-production
+RESEND_API_KEY                  = re_xxx (opsional)
+RESEND_FROM_EMAIL               = noreply@domain.com (opsional)
 ```
 
 5. Klik **Deploy**
