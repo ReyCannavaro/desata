@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: { default: "DESATA", template: "%s — DESATA" },
   description: "Desa Kita, Data Kita, Masa Depan Kita.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.svg",
   },
 };
 
