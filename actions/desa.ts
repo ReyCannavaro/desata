@@ -10,6 +10,16 @@ export interface DesaPublikInfo {
   kabupaten: string;
   provinsi: string;
   logo_url: string | null;
+  jumlah_penduduk: number | null;
+  jumlah_kk: number | null;
+  luas_wilayah_ha: number | null;
+  jumlah_dusun: number | null;
+  jumlah_rw: number | null;
+  jumlah_rt: number | null;
+  kode_desa: string | null;
+  tahun_berdiri: number | null;
+  visi: string | null;
+  misi: string[] | null;
 }
 
 export interface PengumumanItem {
@@ -33,14 +43,6 @@ export interface BerandaData {
   laporanBaru: number;
 }
 
-function getFallbackStats() {
-  return {
-    jumlahPenduduk: parseInt(process.env.DESA_JUMLAH_PENDUDUK ?? "0"),
-    jumlahKK: parseInt(process.env.DESA_JUMLAH_KK ?? "0"),
-    luasWilayah: process.env.DESA_LUAS_WILAYAH ?? "—",
-    wilayahAdmin: process.env.DESA_WILAYAH_ADMIN ?? "—",
-  };
-}
 
 export async function getBerandaData(): Promise<BerandaData> {
   const desaId = await getPublikDesaIdSafe();
@@ -53,21 +55,10 @@ export async function getBerandaData(): Promise<BerandaData> {
       .select("id, nama, kecamatan, kabupaten, provinsi, logo_url, jumlah_penduduk, jumlah_kk, luas_wilayah_ha, jumlah_dusun, jumlah_rw, jumlah_rt, kode_desa, tahun_berdiri, visi, misi")
       .eq("id", desaId)
       .single();
-    desa = data ?? null;
+    desa = (data ?? null) as unknown as DesaPublikInfo | null;
   }
 
-  const desaExt = desa as typeof desa & {
-    jumlah_penduduk?: number | null;
-    jumlah_kk?: number | null;
-    luas_wilayah_ha?: number | null;
-    jumlah_dusun?: number | null;
-    jumlah_rw?: number | null;
-    jumlah_rt?: number | null;
-    kode_desa?: string | null;
-    tahun_berdiri?: number | null;
-    visi?: string | null;
-    misi?: string[] | null;
-  };
+  const desaExt = desa;
 
   let pengumuman: PengumumanItem[] = [];
   try {
